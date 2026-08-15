@@ -1,0 +1,133 @@
+/* =========================================================
+   Dashboard / passbook cards / signature element
+   ========================================================= */
+.balance-row{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-bottom:22px;}
+
+.passbook-card{
+  position:relative;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:22px 22px 20px 30px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.passbook-perf{
+  position:absolute; left:0; top:0; bottom:0; width:14px;
+  background-image:radial-gradient(circle, var(--bg) 3px, transparent 3.2px);
+  background-size:14px 16px;
+  background-position:0 4px;
+  border-right:1px dashed var(--line-strong);
+}
+.passbook-label{font-size:12.5px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); margin-bottom:8px;}
+.passbook-amount{
+  font-family:var(--font-mono); font-size:28px; font-weight:700; font-variant-numeric:tabular-nums;
+  letter-spacing:-0.01em; margin-bottom:6px;
+}
+.passbook-card.cash .passbook-amount{color:var(--amber);}
+.passbook-card.bank .passbook-amount{color:var(--navy);}
+.passbook-card.total .passbook-amount{color:var(--emerald);}
+.passbook-tag{font-size:12px; color:var(--ink-soft);}
+
+.quick-actions{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px;}
+.quick-action{
+  background:var(--surface); border:1px solid var(--line); border-radius:12px;
+  padding:16px 12px; display:flex; flex-direction:column; align-items:center; gap:8px;
+  font-size:13px; font-weight:600; color:var(--ink); cursor:pointer;
+  transition:border-color .15s ease, transform .12s ease, box-shadow .15s ease;
+}
+.quick-action span{font-size:18px; color:var(--emerald);}
+.quick-action:hover{border-color:var(--emerald); box-shadow:var(--shadow); transform:translateY(-1px);}
+
+.month-stats{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+.stat{display:flex; flex-direction:column; gap:4px;}
+.stat-label{font-size:12.5px; color:var(--ink-soft); font-weight:600; text-transform:uppercase; letter-spacing:.04em;}
+.stat-value{font-family:var(--font-mono); font-size:19px; font-weight:700;}
+.stat-value.income{color:var(--emerald);}
+.stat-value.expense{color:var(--crimson);}
+.stat-value.transfer{color:var(--navy);}
+
+.insights-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px;}
+.insights-list li{
+  font-size:13.5px; line-height:1.5; padding-left:18px; position:relative; color:var(--ink);
+}
+.insights-list li::before{content:"—"; position:absolute; left:0; color:var(--emerald); font-weight:700;}
+
+/* -------------------- Transaction rows/table -------------------- */
+.txn-table{width:100%; border-collapse:collapse; font-size:13.5px;}
+.txn-table th{
+  text-align:left; padding:10px 10px; font-size:11.5px; text-transform:uppercase; letter-spacing:.05em;
+  color:var(--ink-soft); border-bottom:1px solid var(--line); font-weight:700;
+}
+.txn-table td{padding:12px 10px; border-bottom:1px solid var(--line); vertical-align:middle;}
+.txn-table tr:last-child td{border-bottom:none;}
+.txn-row{cursor:pointer;}
+.txn-row:hover td{background:var(--surface-2);}
+.txn-desc{font-weight:600;}
+.txn-sub{color:var(--ink-soft); font-size:12px;}
+.pill{
+  display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:99px;
+  font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.03em;
+}
+.pill.income{background:var(--emerald-soft); color:var(--emerald);}
+.pill.expense{background:var(--crimson-soft); color:var(--crimson);}
+.pill.transfer{background:var(--navy-soft); color:var(--navy);}
+.txn-actions{display:flex; gap:8px;}
+.icon-btn{
+  background:none; border:1px solid var(--line); border-radius:7px; width:28px; height:28px;
+  cursor:pointer; color:var(--ink-soft); display:flex; align-items:center; justify-content:center; font-size:13px;
+}
+.icon-btn:hover{color:var(--ink); border-color:var(--line-strong);}
+
+.filters-bar{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;}
+.search-input, .select-input{
+  font-family:var(--font-body); font-size:13.5px; padding:9px 12px; border-radius:8px;
+  border:1px solid var(--line-strong); background:var(--surface-2); color:var(--ink);
+}
+.search-input{flex:1; min-width:200px;}
+.select-input{min-width:130px;}
+
+/* -------------------- Budgets -------------------- */
+.budget-item{padding:16px 0; border-bottom:1px solid var(--line);}
+.budget-item:last-child{border-bottom:none;}
+.budget-top{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;}
+.budget-cat{font-weight:600; font-size:14.5px;}
+.budget-nums{font-family:var(--font-mono); font-size:13px; color:var(--ink-soft);}
+.budget-bar-track{background:var(--surface-2); border-radius:99px; height:9px; overflow:hidden; border:1px solid var(--line);}
+.budget-bar-fill{height:100%; border-radius:99px; background:var(--emerald); transition:width .3s ease;}
+.budget-bar-fill.warn{background:var(--amber);}
+.budget-bar-fill.over{background:var(--crimson);}
+.budget-msg{font-size:12.5px; margin-top:6px; font-weight:600;}
+.budget-msg.warn{color:var(--amber);}
+.budget-msg.over{color:var(--crimson);}
+.budget-row-actions{display:flex; gap:8px; margin-top:8px;}
+
+/* -------------------- Goals -------------------- */
+.goal-card{
+  border:1px solid var(--line); border-radius:12px; padding:16px 18px; margin-bottom:12px;
+  background:var(--surface-2);
+}
+.goal-top{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;}
+.goal-name{font-weight:700; font-size:15px;}
+.goal-pct{font-family:var(--font-mono); font-size:13px; color:var(--emerald); font-weight:700;}
+.goal-nums{font-family:var(--font-mono); font-size:12.5px; color:var(--ink-soft); margin-bottom:8px;}
+
+/* -------------------- Analytics -------------------- */
+.stat-strip{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px;}
+.stat-strip .card{margin-bottom:0; padding:16px 18px;}
+.stat-strip .stat-label{margin-bottom:6px; display:block;}
+.stat-strip .stat-value{font-size:20px;}
+
+/* -------------------- Reports -------------------- */
+.report-summary{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:10px;}
+.report-stat{border:1px solid var(--line); border-radius:10px; padding:14px 16px; background:var(--surface-2);}
+.report-stat .stat-label{margin-bottom:6px; display:block;}
+.report-stat .stat-value{font-size:17px;}
+
+/* -------------------- Transfer direction toggle -------------------- */
+.transfer-direction{display:flex; gap:8px; margin-bottom:18px;}
+.dir-btn{
+  flex:1; padding:12px; border-radius:9px; border:1px solid var(--line-strong); background:var(--surface-2);
+  cursor:pointer; font-weight:600; font-size:13.5px; color:var(--ink-soft);
+}
+.dir-btn.active{background:var(--emerald-soft); color:var(--emerald); border-color:var(--emerald);}

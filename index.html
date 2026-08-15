@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ledger — Personal Finance & Expense Dashboard</title>
+<meta name="description" content="A responsive personal finance web app for tracking cash, bank balance, income, expenses, transfers, budgets and goals.">
+<meta name="theme-color" content="#1F6F4A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ledger">
+<link rel="icon" href="data:,">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./assets/icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/dashboard.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+<!-- ===================== ONBOARDING ===================== -->
+<div id="onboarding" class="onboarding hidden" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle">
+  <div class="onboarding-card">
+    <div class="onboarding-mark">L</div>
+    <h1 id="onboardingTitle">Welcome to Ledger</h1>
+    <p class="onboarding-sub">Before we open your book, tell us what you're holding right now. These opening balances aren't income — they're just your starting point.</p>
+    <form id="onboardingForm" novalidate>
+      <label class="field">
+        <span>Cash in hand</span>
+        <div class="input-money"><span class="prefix">₹</span><input type="number" id="ob-cash" min="0" step="0.01" placeholder="0.00" required></div>
+      </label>
+      <label class="field">
+        <span>Bank balance</span>
+        <div class="input-money"><span class="prefix">₹</span><input type="number" id="ob-bank" min="0" step="0.01" placeholder="0.00" required></div>
+      </label>
+      <p class="field-error" id="onboardingError" role="alert"></p>
+      <button type="submit" class="btn btn-primary btn-block">Open my ledger →</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== APP SHELL ===================== -->
+<div id="app" class="app hidden">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-mark">L</span>
+      <span class="brand-name">Ledger</span>
+    </div>
+    <nav class="nav" id="sidebarNav">
+      <button class="nav-item active" data-page="dashboard"><span class="nav-tab">01</span>Dashboard</button>
+      <button class="nav-item" data-page="transactions"><span class="nav-tab">02</span>Transactions</button>
+      <button class="nav-item" data-page="income"><span class="nav-tab">03</span>Add Income</button>
+      <button class="nav-item" data-page="expense"><span class="nav-tab">04</span>Add Expense</button>
+      <button class="nav-item" data-page="transfer"><span class="nav-tab">05</span>Transfer Money</button>
+      <button class="nav-item" data-page="budgets"><span class="nav-tab">06</span>Budgets</button>
+      <button class="nav-item" data-page="analytics"><span class="nav-tab">07</span>Analytics</button>
+      <button class="nav-item" data-page="goals"><span class="nav-tab">08</span>Financial Goals</button>
+      <button class="nav-item" data-page="reports"><span class="nav-tab">09</span>Reports</button>
+      <button class="nav-item" data-page="settings"><span class="nav-tab">10</span>Settings</button>
+    </nav>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+      <span id="themeIcon">◐</span> <span id="themeLabel">Dark mode</span>
+    </button>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <button class="back-btn hidden" id="backToDashboardBtn">← Back to Dashboard</button>
+        <p class="eyebrow" id="pageEyebrow">Overview</p>
+        <h1 id="pageTitle">Dashboard</h1>
+      </div>
+      <button class="btn btn-primary" id="quickAddBtn">+ Add Transaction</button>
+    </header>
+
+    <!-- ---------- DASHBOARD PAGE ---------- -->
+    <section class="page" id="page-dashboard">
+      <div class="balance-row">
+        <div class="passbook-card cash">
+          <div class="passbook-perf"></div>
+          <p class="passbook-label">Cash in hand</p>
+          <p class="passbook-amount" id="db-cash">₹0.00</p>
+          <p class="passbook-tag">Physical wallet</p>
+        </div>
+        <div class="passbook-card bank">
+          <div class="passbook-perf"></div>
+          <p class="passbook-label">Bank balance</p>
+          <p class="passbook-amount" id="db-bank">₹0.00</p>
+          <p class="passbook-tag">Linked account</p>
+        </div>
+        <div class="passbook-card total">
+          <div class="passbook-perf"></div>
+          <p class="passbook-label">Total money</p>
+          <p class="passbook-amount" id="db-total">₹0.00</p>
+          <p class="passbook-tag">Cash + Bank</p>
+        </div>
+      </div>
+
+      <div class="quick-actions">
+        <button class="quick-action" data-page="income"><span>↓</span>Add Income</button>
+        <button class="quick-action" data-page="expense"><span>↑</span>Add Expense</button>
+        <button class="quick-action" data-page="transfer"><span>⇄</span>Transfer Money</button>
+        <button class="quick-action" data-page="analytics"><span>▤</span>View Analytics</button>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h2>This month</h2>
+          <div class="month-stats">
+            <div class="stat"><span class="stat-label">Income</span><span class="stat-value income" id="ms-income">₹0.00</span></div>
+            <div class="stat"><span class="stat-label">Expenses</span><span class="stat-value expense" id="ms-expense">₹0.00</span></div>
+            <div class="stat"><span class="stat-label">Transferred</span><span class="stat-value transfer" id="ms-transfer">₹0.00</span></div>
+            <div class="stat"><span class="stat-label">Savings</span><span class="stat-value income" id="ms-savings">₹0.00</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Insights</h2>
+          <ul class="insights-list" id="insightsList"></ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Recent transactions</h2>
+          <button class="link-btn" data-page="transactions">View all →</button>
+        </div>
+        <div id="recentTxns"></div>
+      </div>
+
+      <div class="card" id="upcomingCard">
+        <h2>Upcoming payments</h2>
+        <div id="upcomingList"></div>
+      </div>
+    </section>
+
+    <!-- ---------- TRANSACTIONS PAGE ---------- -->
+    <section class="page hidden" id="page-transactions">
+      <div class="card">
+        <div class="filters-bar">
+          <input type="text" id="searchInput" class="search-input" placeholder="Search description, category, source, notes…">
+          <select id="filterType" class="select-input">
+            <option value="all">All types</option>
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+            <option value="transfer">Transfer</option>
+          </select>
+          <select id="filterAccount" class="select-input">
+            <option value="all">All accounts</option>
+            <option value="cash">Cash</option>
+            <option value="bank">Bank</option>
+          </select>
+          <select id="filterCategory" class="select-input">
+            <option value="all">All categories</option>
+          </select>
+          <select id="filterDate" class="select-input">
+            <option value="all">All time</option>
+            <option value="today">Today</option>
+            <option value="week">This week</option>
+            <option value="month">This month</option>
+            <option value="lastmonth">Last month</option>
+            <option value="custom">Custom range</option>
+          </select>
+        </div>
+        <div class="filters-bar hidden" id="customRangeBar">
+          <label>From <input type="date" id="customFrom" class="select-input"></label>
+          <label>To <input type="date" id="customTo" class="select-input"></label>
+        </div>
+        <div id="txnTableWrap"></div>
+      </div>
+    </section>
+
+    <!-- ---------- ADD INCOME PAGE ---------- -->
+    <section class="page hidden" id="page-income">
+      <div class="card form-card">
+        <h2>Add income</h2>
+        <form id="incomeForm" novalidate>
+          <label class="field"><span>Amount</span><div class="input-money"><span class="prefix">₹</span><input type="number" min="0.01" step="0.01" id="inc-amount" required></div></label>
+          <label class="field"><span>Date</span><input type="date" id="inc-date" required></label>
+          <label class="field"><span>Source</span>
+            <select id="inc-source" required>
+              <option value="">Select source</option>
+              <option>Salary</option><option>Pocket Money</option><option>Parents</option>
+              <option>Scholarship</option><option>Freelance</option><option>Business</option>
+              <option>Gift</option><option>Refund</option><option>Other</option>
+            </select>
+          </label>
+          <label class="field"><span>Account</span>
+            <select id="inc-account" required><option value="cash">Cash</option><option value="bank">Bank</option></select>
+          </label>
+          <label class="field"><span>Category</span>
+            <select id="inc-category" required></select>
+          </label>
+          <label class="field"><span>Description</span><input type="text" id="inc-desc" placeholder="e.g. August salary"></label>
+          <p class="field-error" id="incomeError" role="alert"></p>
+          <button type="submit" class="btn btn-primary btn-block">Add income</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ---------- ADD EXPENSE PAGE ---------- -->
+    <section class="page hidden" id="page-expense">
+      <div class="card form-card">
+        <h2>Add expense</h2>
+        <form id="expenseForm" novalidate>
+          <label class="field"><span>Amount</span><div class="input-money"><span class="prefix">₹</span><input type="number" min="0.01" step="0.01" id="exp-amount" required></div></label>
+          <label class="field"><span>Date</span><input type="date" id="exp-date" required></label>
+          <label class="field"><span>Category</span>
+            <select id="exp-category" required></select>
+          </label>
+          <label class="field"><span>Account</span>
+            <select id="exp-account" required><option value="cash">Cash</option><option value="bank">Bank</option></select>
+          </label>
+          <label class="field"><span>Description</span><input type="text" id="exp-desc" placeholder="e.g. Lunch"></label>
+          <label class="field"><span>Notes (optional)</span><textarea id="exp-notes" rows="2"></textarea></label>
+          <label class="checkbox-field"><input type="checkbox" id="exp-recurring"><span>This is a recurring expense</span></label>
+          <div id="exp-recurring-fields" class="hidden">
+            <label class="field"><span>Frequency</span>
+              <select id="exp-frequency"><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly" selected>Monthly</option><option value="yearly">Yearly</option></select>
+            </label>
+          </div>
+          <p class="field-error" id="expenseError" role="alert"></p>
+          <button type="submit" class="btn btn-primary btn-block">Add expense</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ---------- TRANSFER PAGE ---------- -->
+    <section class="page hidden" id="page-transfer">
+      <div class="card form-card">
+        <h2>Transfer money</h2>
+        <p class="muted">Moving money between your own accounts is never income or an expense — your total stays exactly the same.</p>
+        <form id="transferForm" novalidate>
+          <div class="transfer-direction" id="transferDirection">
+            <button type="button" class="dir-btn active" data-dir="bank-cash">Bank → Cash</button>
+            <button type="button" class="dir-btn" data-dir="cash-bank">Cash → Bank</button>
+          </div>
+          <label class="field"><span>Amount</span><div class="input-money"><span class="prefix">₹</span><input type="number" min="0.01" step="0.01" id="trf-amount" required></div></label>
+          <label class="field"><span>Date</span><input type="date" id="trf-date" required></label>
+          <label class="field"><span>Description</span><input type="text" id="trf-desc" placeholder="e.g. ATM withdrawal"></label>
+          <p class="field-error" id="transferError" role="alert"></p>
+          <button type="submit" class="btn btn-primary btn-block">Transfer</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ---------- BUDGETS PAGE ---------- -->
+    <section class="page hidden" id="page-budgets">
+      <div class="card">
+        <div class="card-head"><h2>Monthly budgets</h2><button class="btn btn-secondary" id="addBudgetBtn">+ New budget</button></div>
+        <div id="budgetsList"></div>
+      </div>
+      <div class="card hidden" id="budgetFormCard">
+        <h2>New budget</h2>
+        <form id="budgetForm" novalidate>
+          <label class="field"><span>Category</span><select id="bud-category" required></select></label>
+          <label class="field"><span>Monthly limit</span><div class="input-money"><span class="prefix">₹</span><input type="number" min="0.01" step="0.01" id="bud-amount" required></div></label>
+          <p class="field-error" id="budgetError" role="alert"></p>
+          <div class="form-row">
+            <button type="submit" class="btn btn-primary">Save budget</button>
+            <button type="button" class="btn btn-ghost" id="cancelBudgetBtn">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ---------- ANALYTICS PAGE ---------- -->
+    <section class="page hidden" id="page-analytics">
+      <div class="stat-strip" id="analyticsStrip"></div>
+      <div class="grid-2">
+        <div class="card"><h2>Expense by category</h2><canvas id="chartCategory" height="260"></canvas></div>
+        <div class="card"><h2>Cash vs Bank</h2><canvas id="chartCashBank" height="260"></canvas></div>
+      </div>
+      <div class="card"><h2>Monthly expense trend</h2><canvas id="chartTrend" height="220"></canvas></div>
+      <div class="card"><h2>Income vs Expenses</h2><canvas id="chartIncomeExpense" height="220"></canvas></div>
+    </section>
+
+    <!-- ---------- GOALS PAGE ---------- -->
+    <section class="page hidden" id="page-goals">
+      <div class="card">
+        <div class="card-head"><h2>Financial goals</h2><button class="btn btn-secondary" id="addGoalBtn">+ New goal</button></div>
+        <div id="goalsList"></div>
+      </div>
+      <div class="card hidden" id="goalFormCard">
+        <h2>New goal</h2>
+        <form id="goalForm" novalidate>
+          <label class="field"><span>Goal name</span><input type="text" id="goal-name" placeholder="e.g. New Laptop" required></label>
+          <label class="field"><span>Category</span>
+            <select id="goal-category"><option>Laptop</option><option>Phone</option><option>Emergency Fund</option><option>Travel</option><option>Education</option><option>Personal</option></select>
+          </label>
+          <label class="field"><span>Target amount</span><div class="input-money"><span class="prefix">₹</span><input type="number" min="0.01" step="0.01" id="goal-target" required></div></label>
+          <label class="field"><span>Current savings</span><div class="input-money"><span class="prefix">₹</span><input type="number" min="0" step="0.01" id="goal-current" value="0"></div></label>
+          <p class="field-error" id="goalError" role="alert"></p>
+          <div class="form-row">
+            <button type="submit" class="btn btn-primary">Save goal</button>
+            <button type="button" class="btn btn-ghost" id="cancelGoalBtn">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ---------- REPORTS PAGE ---------- -->
+    <section class="page hidden" id="page-reports">
+      <div class="card">
+        <div class="filters-bar">
+          <select id="reportRange" class="select-input">
+            <option value="month">This month</option>
+            <option value="lastmonth">Last month</option>
+            <option value="year">This year</option>
+            <option value="custom">Custom range</option>
+          </select>
+          <label class="hidden" id="reportFromWrap">From <input type="date" id="reportFrom" class="select-input"></label>
+          <label class="hidden" id="reportToWrap">To <input type="date" id="reportTo" class="select-input"></label>
+          <button class="btn btn-secondary" id="exportCsvBtn">⬇ Export CSV</button>
+          <button class="btn btn-ghost" id="printReportBtn">🖨 Print report</button>
+        </div>
+        <div id="reportSummary" class="report-summary"></div>
+      </div>
+    </section>
+
+    <!-- ---------- SETTINGS PAGE ---------- -->
+    <section class="page hidden" id="page-settings">
+      <div class="card">
+        <h2>Appearance</h2>
+        <div class="settings-row">
+          <span>Theme</span>
+          <button class="btn btn-secondary" id="settingsThemeBtn">Toggle light / dark</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Demo data</h2>
+        <div class="settings-row">
+          <span>Load sample transactions to explore the app</span>
+          <button class="btn btn-secondary" id="loadDemoBtn">Load demo data</button>
+        </div>
+        <div class="settings-row">
+          <span>Remove all demo data</span>
+          <button class="btn btn-ghost" id="clearDemoBtn">Clear demo data</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Danger zone</h2>
+        <div class="settings-row">
+          <span>Permanently erase every transaction, budget, goal and balance</span>
+          <button class="btn btn-danger" id="resetDataBtn">Reset all data</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Mobile bottom nav -->
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="bn-item active" data-page="dashboard"><span>▦</span>Home</button>
+    <button class="bn-item" data-page="transactions"><span>≡</span>History</button>
+    <button class="bn-item" data-page="expense"><span>+</span>Add</button>
+    <button class="bn-item" data-page="analytics"><span>▤</span>Stats</button>
+    <button class="bn-item" data-page="settings"><span>⚙</span>More</button>
+  </nav>
+</div>
+
+<!-- ===================== MODALS ===================== -->
+<div class="modal-overlay hidden" id="detailModal">
+  <div class="modal">
+    <button class="modal-close" id="closeDetailModal">×</button>
+    <div id="detailModalBody"></div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="confirmModal">
+  <div class="modal modal-sm">
+    <p id="confirmMessage">Are you sure?</p>
+    <div class="form-row">
+      <button class="btn btn-ghost" id="confirmCancel">Cancel</button>
+      <button class="btn btn-danger" id="confirmOk">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/transactions.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/budgets.js"></script>
+<script src="js/goals.js"></script>
+<script src="js/reports.js"></script>
+<script src="js/app.js"></script>
+
+<!-- Service Worker Registration -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./service-worker.js')
+        .then(registration => {
+          console.log('Service Worker registered:', registration);
+        })
+        .catch(error => {
+          console.log('Service Worker registration failed:', error);
+        });
+    });
+  }
+</script>
+</body>
+</html>
